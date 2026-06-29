@@ -1,0 +1,11 @@
+# Secrets - never commit
+*secret*.yaml
+*-secret.yaml
+*.key
+*.pem
+local_api_credentials.yaml
+*.env
+
+# OS/editor noise
+.DS_Store
+*.swp
