@@ -1,0 +1,56 @@
+global:
+  enabled: true
+  tlsDisable: true
+
+server:
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.21.2"
+
+  nodeSelector:
+    kubernetes.io/hostname: kube002
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  dataStorage:
+    enabled: true
+    size: 5Gi
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+
+  standalone:
+    enabled: false
+
+  ha:
+    enabled: true
+    replicas: 1
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+        }
+
+        service_registration "kubernetes" {}
+
+  service:
+    enabled: true
+
+ui:
+  enabled: true
+  serviceType: "ClusterIP"
