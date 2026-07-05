@@ -1,0 +1,26 @@
+image:
+  tag: "1.36.0-alpine"
+
+fullnameOverride: vaultwarden
+
+domain: "https://vw.jmarcelocarvalho.com"
+
+signupsAllowed: false
+invitationsAllowed: true
+
+adminToken:
+  existingSecret: vaultwarden-admin
+  existingSecretKey: admin-token
+
+storage:
+  data:
+    name: vaultwarden-data
+    size: "5Gi"
+    class: local-path
+    accessMode: ReadWriteOnce
+
+nodeSelector:
+  kubernetes.io/hostname: kube003
+
+ingress:
+  enabled: false

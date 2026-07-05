@@ -55,6 +55,13 @@ spec:
               value: "30022"
             - name: GITEA__server__DISABLE_SSH
               value: "false"
+            - name: GITEA__metrics__ENABLED
+              value: "true"
+            - name: GITEA__metrics__TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-metrics
+                  key: token
           ports:
             - containerPort: 3000
               name: http
@@ -83,6 +90,8 @@ kind: Service
 metadata:
   name: gitea-http
   namespace: gitea
+  labels:
+    app: gitea
 spec:
   selector:
     app: gitea

@@ -1,0 +1,161 @@
+# kube-prometheus-stack values — K3s homelab (4 nodes)
+# Chart: prometheus-community/kube-prometheus-stack 87.4.0
+# Release name assumed: kube-prom   (helm install kube-prom ... -n monitoring)
+#
+# Design notes:
+#  - Stateful pieces (Prometheus, Alertmanager, Grafana) pinned to kubecp (32GB, most headroom).
+#    local-path pins PVC data to that node anyway, so co-locating keeps all monitoring state on one host.
+#  - node-exporter stays a DaemonSet (lands on ALL nodes automatically — that's your per-node data).
+#  - K3s runs controller-manager/scheduler/proxy/etcd embedded, so their default scrape targets are
+#    disabled to avoid permanently-"down" targets cluttering the target list.
+#  - serviceMonitorSelectorNilUsesHelmValues=false so Prometheus discovers ANY ServiceMonitor in the
+#    cluster (not just ones labelled release=kube-prom). This is the single biggest "why isn't my
+#    target showing up" gotcha — see the Vault/Gitea ServiceMonitors.
+
+crds:
+  enabled: true
+
+# ---------------------------------------------------------------------------
+# Disable K3s-embedded control-plane scrape targets
+# ---------------------------------------------------------------------------
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false
+
+# kubelet / cAdvisor stays ON — this is your per-pod / per-container CPU + memory
+kubelet:
+  enabled: true
+
+# ---------------------------------------------------------------------------
+# Prometheus
+# ---------------------------------------------------------------------------
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    retentionSize: "20GB"        # hard cap; keeps disk under the 25Gi PVC with compaction headroom
+    walCompression: true
+
+    # Discover ServiceMonitors/PodMonitors/Rules cluster-wide, not just release-labelled ones
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    scrapeConfigSelectorNilUsesHelmValues: false
+
+    nodeSelector:
+      kubernetes.io/hostname: kubecp
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 25Gi
+
+# ---------------------------------------------------------------------------
+# Alertmanager (kept minimal — enabled but no routes configured yet)
+# ---------------------------------------------------------------------------
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    nodeSelector:
+      kubernetes.io/hostname: kubecp
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+# ---------------------------------------------------------------------------
+# Grafana
+# ---------------------------------------------------------------------------
+grafana:
+  enabled: true
+  nodeSelector:
+    kubernetes.io/hostname: kubecp
+
+  # Admin creds pulled from a pre-created Secret (keeps the password out of git).
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    accessModes: ["ReadWriteOnce"]
+    size: 5Gi
+
+  # We expose Grafana via our own Traefik Ingress (grafana-ingress.yaml), so disable the chart's.
+  ingress:
+    enabled: false
+
+  grafana.ini:
+    server:
+      domain: grafana.jmarcelocarvalho.com
+      root_url: https://grafana.jmarcelocarvalho.com
+    # Behind Traefik TLS termination; trust the forwarded proto header
+    security:
+      cookie_secure: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ---------------------------------------------------------------------------
+# Supporting components (lightweight — left to float across the cluster)
+# ---------------------------------------------------------------------------
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi

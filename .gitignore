@@ -9,3 +9,14 @@ local_api_credentials.yaml
 # OS/editor noise
 .DS_Store
 *.swp
+
+# Wazuh — private keys, CSRs, serials (generated locally, never committed)
+wazuh/wazuh-kubernetes/wazuh/certs/**/*.pem
+wazuh/wazuh-kubernetes/wazuh/certs/**/*.csr
+wazuh/wazuh-kubernetes/wazuh/certs/**/*.srl
+
+# Wazuh — credential secrets (default + rotated hashes)
+wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml
+# Wazuh — backup files that could contain secrets
+wazuh/wazuh-kubernetes/wazuh/secrets/*.bak
+wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml.bak

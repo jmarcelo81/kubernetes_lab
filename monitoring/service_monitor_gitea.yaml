@@ -1,0 +1,43 @@
+# ServiceMonitor: Gitea
+# ---------------------------------------------------------------------------
+# PREREQUISITE ON THE GITEA SIDE:
+# The /metrics endpo int is DISABLED by default. Enable it in your Gitea
+# Deployment (gitea/gitea:1.26.4) via env var, then restart the pod:
+#
+#   env:
+#     - name: GITEA__metrics__ENABLED
+#       value: "true"
+#     # optional: require a bearer token to scrape
+#     # - name: GITEA__metrics__TOKEN
+#     #   valueFrom:
+#     #     secretKeyRef: { name: gitea-metrics, key: token }
+#
+# If you set a TOKEN, add bearerTokenSecret to the endpoint below.
+#
+# ADJUST THE SELECTOR/PORT to match your actual Gitea Service. Check with:
+#   kubectl -n gitea get svc gitea -o yaml | grep -A6 'labels:\|ports:'
+# The `selector.matchLabels` here must match the LABELS ON THE SERVICE, and
+# `port` must match the Service's port NAME (not number).
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gitea
+  namespace: monitoring
+  labels:
+    release: kube-prom
+spec:
+  namespaceSelector:
+    matchNames:
+      - gitea
+  selector:
+    matchLabels:
+      app: gitea            # <-- match the Service's labels
+  endpoints:
+    - port: http            # <-- match Service's port NAME (3000)
+      path: /metrics
+      interval: 30s
+      authorization:
+        credentials:
+          name: gitea-metrics
+          key: token

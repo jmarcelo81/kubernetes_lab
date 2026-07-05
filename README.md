@@ -11,13 +11,15 @@ The services to be deployed are for learning CI/CD pipelines, how the tools are 
 - [Uptime Kuma](./uptime-kuma/README.md) — uptime monitoring
 - [Gitea](./gitea/README.md) — self-hosted git
 - [HashiCorp Vault](./vault/README.md) — secrets management
+- [Password Manager](./vaultwarden/README.md) — self-hosted password vault
+- [Prometheus & Grafana](./monitoring/README.md) - cluster health monitoring
+- [Wazuh](./wazuh/README.md) - To be created
+
 
 ### To be deployed
-- **Password Manager**
-- **Netbox**
-- **Prometheus and Grafana**
+
 - **Ansible**
-- **Wazuh**
+- **Netbox**
 - **Immich**
 - **Jellyfin**
 - **NextCloud**

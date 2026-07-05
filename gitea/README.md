@@ -2,11 +2,9 @@
 
 ## 1. What it is
 
-Gitea is a self-hosted Git service — my local alternative to GitHub for storing lab manifests,
-configs, and project code.
+Gitea is a self-hosted Git service — my local alternative to GitHub for storing lab manifests, configs, and project code.
 
-The goal is a private, self-controlled git server that mirrors or complements GitHub, and
-eventually serves as the source-of-truth for my internal CI/CD pipeline via Argo CD.
+The goal is a private, self-controlled git server that mirrors or complements GitHub, and eventually serves as the source-of-truth for my internal CI/CD pipeline via Argo CD.
 
 ## 2. Facts
 
@@ -30,8 +28,7 @@ SSH is exposed via a dedicated `NodePort` service on port `30022` rather than th
 ingress controller, since Traefik handles HTTP/HTTPS only. A UFW rule on `kubecp` allows
 SSH access from within the cluster subnet.
 
-CrowdSec bouncer middleware is applied at the ingress level, meaning all HTTP traffic to
-Gitea passes through the CrowdSec decision engine before reaching the pod.
+CrowdSec bouncer middleware is applied at the ingress level, meaning all HTTP traffic to Gitea passes through the CrowdSec decision engine before reaching the pod.
 
 ## 4. Deployment steps
 
@@ -86,3 +83,4 @@ stored in the manifest — set during first-run web UI setup.
 - Connect Gitea as a source repo for Argo CD
 - Mirror key GitHub repos into Gitea for full self-hosted redundancy
 - Set up Gitea Actions for internal CI runs
+- Migrate services to Helm as a progression when I need to upgrade it

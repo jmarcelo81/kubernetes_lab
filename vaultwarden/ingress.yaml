@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-crowdsec-bouncer@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["vw.jmarcelocarvalho.com"]
+      secretName: vaultwarden-tls
+  rules:
+    - host: vw.jmarcelocarvalho.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vaultwarden
+                port:
+                  number: 80   # VERIFY: kubectl get svc -n vaultwarden vaultwarden

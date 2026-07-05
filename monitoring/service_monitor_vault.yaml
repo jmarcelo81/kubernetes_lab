@@ -1,0 +1,63 @@
+# ServiceMonitor: HashiCorp Vault
+# ---------------------------------------------------------------------------
+# PREREQUISITES ON THE VAULT SIDE (this Service Monitor alone won't produce data):
+#
+# 1) Telemetry must be enabled in the Vault server config (server.ha.raft.config
+#    in your Vault Helm values). The Prometheus endpoint is OFF unless
+#    prometheus_retention_time > 0:
+#
+#      telemetry {
+#        prometheus_retention_time = "24h"
+#        disable_hostname          = true
+#      }
+#
+# 2) The /v1/sys/metrics endpoint requires auth by default. For an internal-only
+#    cluster scrape, the documented approach is to allow unauthenticated access
+#    on the listener:
+#
+#      listener "tcp" {
+#        # ...existing...
+#        telemetry {
+#          unauthenticated_metrics_access = true
+#        }
+#      }
+#
+#    (Token-based scraping is possible via bearerTokenSecret, but Vault tokens
+#    expire — you'd need a renewable/periodic token, which is more moving parts
+#    than it's worth for a lab. unauthenticated_metrics_access on an internal
+#    listener is the standard pattern.)
+#
+# 3) Applying these requires a Vault config change + pod restart, then re-unseal
+#    (Shamir, threshold 3). Plan for a manual unseal after the rollout.
+#
+# SCHEME: set to http below. If your Vault listener has TLS enabled
+# (tls_disable = 0), change scheme to https and add tlsConfig.insecureSkipVerify: true
+# (or mount the CA).
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vault
+  namespace: monitoring
+  labels:
+    release: kube-prom        # harmless; values.yaml also discovers unlabelled SMs
+spec:
+  namespaceSelector:
+    matchNames:
+      - vault
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/instance: vault
+      vault-active: "true"    # scrape only the active node; drop this line if single-replica and the label isn't present
+  endpoints:
+    - port: http              # Vault Helm service port name for 8200
+      path: /v1/sys/metrics
+      scheme: http            # -> https if your listener has TLS
+      interval: 30s
+      scrapeTimeout: 10s
+      params:
+        format: ["prometheus"]
+      # tlsConfig:            # uncomment if scheme: https
+      #   insecureSkipVerify: true
