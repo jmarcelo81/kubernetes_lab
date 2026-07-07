@@ -8,7 +8,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: wazuh-manager-worker
+  name: wazuh-manager-master
   namespace: wazuh
 spec:
   template:
@@ -23,7 +23,7 @@ spec:
               memory: 1Gi
             limits:
               cpu: "1"
-              memory: 2Gi
+              memory: 4Gi
 ---
 apiVersion: apps/v1
 kind: StatefulSet
