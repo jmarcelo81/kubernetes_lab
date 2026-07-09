@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  namespace: jellyfin
+  labels: { app: jellyfin }
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate            # SQLite on a RWO config PVC — never two pods on the same volume
+  selector:
+    matchLabels: { app: jellyfin }
+  template:
+    metadata:
+      labels: { app: jellyfin }
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: kube003   # scheduling here is what makes local-path bind on kube003
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:10.10.7   # PIN — confirm current stable tag, do not float to latest
+          ports:
+            - { name: http, containerPort: 8096 }
+          env:
+            - { name: TZ, value: "Europe/Madrid" }   # set to your tz; affects scheduled tasks + logs only
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { cpu: "2",  memory: 2Gi }       # headroom for software transcode (CPU-bound)
+          readinessProbe:
+            httpGet: { path: /health, port: 8096 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8096 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          volumeMounts:
+            - { name: config, mountPath: /config }
+            - { name: media,  mountPath: /media }
+      volumes:
+        - name: config
+          persistentVolumeClaim: { claimName: jellyfin-config }
+        - name: media
+          persistentVolumeClaim: { claimName: jellyfin-media }
