@@ -1,22 +1,32 @@
-# Secrets - never commit
-*secret*.yaml
-*-secret.yaml
+# === Secret MATERIAL — guarded by content/location, not filename ===
+# ESO manifests (ExternalSecret, ClusterSecretStore) carry only Vault
+# references — no secret values — so they are safe to commit. Real credential
+# material is not: keys, certs, env files, populated kind:Secret manifests,
+# and terraform state.
 *.key
 *.pem
-local_api_credentials.yaml
 *.env
+.env
+local_api_credentials.yaml
 
-# OS/editor noise
+# Drop any genuine kind:Secret manifests you must keep locally into secrets/
+secrets/
+
+# Terraform state / var overrides (root-level belt-and-suspenders;
+# terraform/vault/ also has its own .gitignore)
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+
+# === OS/editor noise ===
 .DS_Store
 *.swp
 
-# Wazuh — private keys, CSRs, serials (generated locally, never committed)
+# === Wazuh (decommissioned; rules harmless until the dir is git rm'd) ===
 wazuh/wazuh-kubernetes/wazuh/certs/**/*.pem
 wazuh/wazuh-kubernetes/wazuh/certs/**/*.csr
 wazuh/wazuh-kubernetes/wazuh/certs/**/*.srl
-
-# Wazuh — credential secrets (default + rotated hashes)
 wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml
-# Wazuh — backup files that could contain secrets
 wazuh/wazuh-kubernetes/wazuh/secrets/*.bak
 wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml.bak
