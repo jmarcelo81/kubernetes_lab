@@ -30,3 +30,4 @@ wazuh/wazuh-kubernetes/wazuh/certs/**/*.srl
 wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml
 wazuh/wazuh-kubernetes/wazuh/secrets/*.bak
 wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml.bak
+smoketest/
