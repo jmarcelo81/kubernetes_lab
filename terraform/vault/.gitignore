@@ -1,0 +1,13 @@
+# PUBLIC REPO — state can contain sensitive material. Never commit it.
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# tfvars may hold secrets; commit the .example instead
+*.tfvars
+*.tfvars.json
+
+# DO commit the lock file — it pins provider hashes
+!.terraform.lock.hcl
