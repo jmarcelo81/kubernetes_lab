@@ -1,0 +1,48 @@
+# argo-cd chart 10.1.2 (Argo CD v3.4.4)
+
+global:
+  nodeSelector:
+    kubernetes.io/hostname: kubecp
+
+configs:
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    hostname: argocd.jmarcelocarvalho.com
+    path: /
+    pathType: Prefix
+    tls: true
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+repoServer:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+applicationSet:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+notifications:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
