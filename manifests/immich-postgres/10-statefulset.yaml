@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: immich-postgres
+  namespace: immich
+  labels: { app: immich-postgres }
+spec:
+  serviceName: immich-postgres     # must match the headless Service
+  replicas: 1
+  selector:
+    matchLabels: { app: immich-postgres }
+  template:
+    metadata:
+      labels: { app: immich-postgres }
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: kube001    # pin: matches Immich components + local-path PVC
+      containers:
+        - name: postgres
+          image: ghcr.io/immich-app/postgres:16-vectorchord0.5.3-pgvector0.8.1     # PIN: pg16 is coupled to Immich's supported major version
+          ports:
+            - { name: postgres, containerPort: 5432 }
+          env:
+            # Non-secret config — plain env vars, not secretKeyRef
+            - { name: POSTGRES_USER, value: immich }
+            - { name: POSTGRES_DB,   value: immich }
+            # PGDATA into a subdir of the mount so lost+found and other volume artifacts
+            # don't confuse Postgres on first init. Standard practice, avoids "not empty" errors.
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+            # THE secret — sourced from ESO-materialized k8s Secret, sourced from Vault
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db-credentials
+                  key: password
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { cpu: "2",  memory: 2Gi }
+          readinessProbe:
+            exec:
+              command: [ "pg_isready", "-U", "immich", "-d", "immich" ]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: [ "pg_isready", "-U", "immich", "-d", "immich" ]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+            - { name: init-sql, mountPath: /docker-entrypoint-initdb.d, readOnly: true }
+      volumes:
+        - name: init-sql
+          configMap:
+            name: immich-postgres-init
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 20Gi

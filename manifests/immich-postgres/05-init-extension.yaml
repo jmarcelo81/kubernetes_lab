@@ -1,0 +1,17 @@
+# Runs once, on the Postgres pod's first boot, via the official image's
+# entrypoint scanning /docker-entrypoint-initdb.d/*.sql. Idempotent by design:
+# the entrypoint only runs these files when PGDATA is empty. Re-syncing this
+# manifest later does NOT re-run the SQL, and does NOT touch DB data.
+#
+# CASCADE is the interesting word: `CREATE EXTENSION vchord CASCADE` installs
+# vchord AND its dependency (pgvector) in the correct order in one statement.
+# Without CASCADE we'd have to write two CREATE EXTENSION lines with the right
+# ordering, which works but is fragile — CASCADE lets Postgres figure it out.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-postgres-init
+  namespace: immich
+data:
+  10-init-vchord.sql: |
+    CREATE EXTENSION IF NOT EXISTS vchord CASCADE;
