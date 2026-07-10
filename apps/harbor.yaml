@@ -1,0 +1,130 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://goharbor.io/charts
+    chart: harbor
+    targetRevision: 60.2.1
+    helm:
+      releaseName: harbor
+      values: |
+        expose:
+          type: ingress
+          ingress:
+            hosts:
+              core: harbor.jmarcelocarvalho.com
+              notary: notary.jmarcelocarvalho.com
+            className: traefik
+            annotations:
+              cert-manager.io/cluster-issuer: selfsigned
+              traefik.ingress.kubernetes.io/router.tls: "true"
+            certSource: cert-manager
+
+        externalURL: https://harbor.jmarcelocarvalho.com
+
+        core:
+          image:
+            repository: goharbor/harbor-core
+            tag: v2.11.0
+          replicas: 1
+
+        jobservice:
+          image:
+            repository: goharbor/harbor-jobservice
+            tag: v2.11.0
+          replicas: 1
+
+        postgresql:
+          enabled: true
+          auth:
+            username: harbor
+            password: harborSecretPassword
+            database: registry
+          primary:
+            persistence:
+              enabled: true
+              size: 10Gi
+              storageClassName: local-path
+
+        redis:
+          enabled: true
+          architecture: standalone
+          auth:
+            enabled: false
+          master:
+            persistence:
+              enabled: true
+              size: 5Gi
+              storageClassName: local-path
+
+        registry:
+          image:
+            repository: goharbor/registry
+            tag: v2.8.3
+          replicas: 1
+          persistence:
+            enabled: true
+            size: 60Gi
+            storageClassName: local-path
+
+        trivy:
+          enabled: true
+          image:
+            repository: goharbor/trivy-adapter
+            tag: v0.54.0
+          replicas: 1
+
+        notary:
+          enabled: true
+          server:
+            image:
+              repository: goharbor/notary-server
+              tag: v0.7.0
+          signer:
+            image:
+              repository: goharbor/notary-signer
+              tag: v0.7.0
+
+        chartmuseum:
+          enabled: false
+
+        portal:
+          image:
+            repository: goharbor/harbor-portal
+            tag: v2.11.0
+          replicas: 1
+
+        persistence:
+          enabled: true
+          resourceName: harbor-data
+          storageClass: local-path
+
+        metrics:
+          enabled: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
