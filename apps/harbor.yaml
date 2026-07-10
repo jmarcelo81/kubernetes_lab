@@ -61,7 +61,7 @@ spec:
         database:
           type: internal
           internal:
-            password: "HarborInternalPG_ChangeMe_Strong123"
+            password: "OpkimpZgCMYVfmrpVGeWRCW6ynpgysKJ"
 
         redis:
           type: internal
