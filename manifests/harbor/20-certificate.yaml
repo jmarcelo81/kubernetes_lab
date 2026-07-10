@@ -12,5 +12,5 @@ spec:
   dnsNames:
     - harbor.jmarcelocarvalho.com
   issuerRef:
-    name: selfsigned
+    name: letsencrypt-cloudflare
     kind: ClusterIssuer
