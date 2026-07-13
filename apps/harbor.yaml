@@ -29,7 +29,6 @@ spec:
               core: harbor.jmarcelocarvalho.com
             className: traefik
             annotations:
-              cert-manager.io/cluster-issuer: letsencrypt-cloudflare
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
 
         externalURL: https://harbor.jmarcelocarvalho.com
