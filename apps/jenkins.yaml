@@ -38,16 +38,6 @@ spec:
           
           JCasC:
             enabled: true
-            configScripts:
-              github: |
-                credentials:
-                  system:
-                    domainCredentials:
-                      - credentials:
-                          - github:
-                              scope: GLOBAL
-                              id: github-jenkins
-                              description: "GitHub token for Jenkins"
 
         agent:
           enabled: true
