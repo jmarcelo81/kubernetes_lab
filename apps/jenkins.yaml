@@ -14,7 +14,8 @@ spec:
     helm:
       values: |
         controller:
-          image: jenkins/jenkins:2.479.1-jdk21
+          image: jenkins/jenkins
+          tag: "2.479.1-jdk21"
           
           persistence:
             enabled: true
@@ -24,6 +25,9 @@ spec:
           serviceAccount:
             create: true
             name: jenkins
+          
+          nodeSelector:
+            kubernetes.io/hostname: kube003
           
           installPlugins:
             - kubernetes:latest
