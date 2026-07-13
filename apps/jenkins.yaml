@@ -15,7 +15,7 @@ spec:
       values: |
         controller:
           image: jenkins/jenkins
-          tag: "2.479.1-jdk21"
+          tag: "2.504.1-jdk21"
           
           persistence:
             enabled: true
