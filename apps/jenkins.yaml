@@ -14,19 +14,13 @@ spec:
     helm:
       values: |
         controller:
-          image:
-            registry: docker.io
-            repository: jenkins/jenkins
-            tag: "2.479-jdk21"
+          image: jenkins/jenkins
+          tagLabel: jdk21
           
           persistence:
             enabled: true
             storageClassName: local-path
             size: 20Gi
-          
-          serviceAccount:
-            create: true
-            name: jenkins
           
           installPlugins:
             - kubernetes:latest
@@ -34,25 +28,11 @@ spec:
             - github-branch-source:latest
             - pipeline-stage-view:latest
             - configuration-as-code:latest
-            - external-secrets-operator:latest
           
-          JCasC:
-            enabled: true
-            configScripts:
-              github: |
-                credentials:
-                  system:
-                    domainCredentials:
-                      - credentials:
-                          - github:
-                              scope: GLOBAL
-                              id: github-jenkins
-                              description: "GitHub token for Jenkins"
+          serviceAccount:
+            create: true
+            name: jenkins
 
-        agent:
-          enabled: true
-          image: jenkins/inbound-agent:latest
-        
         rbac:
           create: true
   
