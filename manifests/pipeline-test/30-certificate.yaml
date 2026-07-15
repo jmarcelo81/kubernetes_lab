@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pipeline-test-tls
+  namespace: pipeline-test
+spec:
+  secretName: pipeline-test-tls
+  issuerRef:
+    name: letsencrypt-cloudflare
+    kind: ClusterIssuer
+  dnsNames:
+    - pipeline-test.jmarcelocarvalho.com

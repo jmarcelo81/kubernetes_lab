@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-test
+  namespace: pipeline-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipeline-test
+  template:
+    metadata:
+      labels:
+        app: pipeline-test
+    spec:
+      containers:
+        - name: pipeline-test
+          image: harbor.jmarcelocarvalho.com/library/jenkins-pipeline-test:4
+          ports:
+            - containerPort: 5000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
