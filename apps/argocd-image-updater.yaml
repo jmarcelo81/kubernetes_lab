@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-image-updater
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argocd-image-updater
+    targetRevision: 0.12.3
+    helm:
+      values: |
+        config:
+          registries:
+            - name: Harbor
+              api_url: https://harbor.jmarcelocarvalho.com
+              prefix: harbor.jmarcelocarvalho.com
+              credentials: secret:argocd/harbor-image-updater#credentials
+              defaultns: library
+          argocd:
+            grpcWeb: true
+            serverAddress: argocd-server.argocd.svc.cluster.local
+            insecure: true
+            plaintext: false
+        
+        serviceAccount:
+          create: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  revisionHistoryLimit: 3
