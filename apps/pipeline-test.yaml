@@ -11,13 +11,13 @@ metadata:
     argocd-image-updater.argoproj.io/write-back-method: git
     argocd-image-updater.argoproj.io/git-branch: main
     argocd-image-updater.argoproj.io/write-back-target: kustomization
-    argocd-image-updater.argoproj.io/git-credentials: git:argocd/git-image-updater
 spec:
   project: default
   source:
     repoURL: https://github.com/jmarcelo81/kubernetes_lab.git
     targetRevision: main
     path: manifests/pipeline-test
+    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: pipeline-test
