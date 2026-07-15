@@ -16,7 +16,6 @@ spec:
             - name: Harbor
               api_url: https://harbor.jmarcelocarvalho.com
               prefix: harbor.jmarcelocarvalho.com
-              defaultns: library
           argocd:
             grpcWeb: true
             serverAddress: argocd-server.argocd.svc.cluster.local

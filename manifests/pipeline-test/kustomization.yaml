@@ -10,5 +10,4 @@ resources:
 
 images:
   - name: harbor.jmarcelocarvalho.com/library/jenkins-pipeline-test
-    newName: harbor.jmarcelocarvalho.com/jenkins-pipeline-test
     newTag: "5"
