@@ -16,7 +16,6 @@ spec:
             - name: Harbor
               api_url: https://harbor.jmarcelocarvalho.com
               prefix: harbor.jmarcelocarvalho.com
-              credentials: secret:argocd/harbor-image-updater#credentials
               defaultns: library
           argocd:
             grpcWeb: true
