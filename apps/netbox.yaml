@@ -1,0 +1,98 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: netbox
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://netbox-community.github.io/netbox-chart/
+    chart: netbox
+    targetRevision: 8.3.37
+    helm:
+      releaseName: netbox
+      values: |
+        replicaCount: 1
+
+        nodeSelector:
+          kubernetes.io/hostname: kube003
+
+        # Superuser bootstrapped from netbox-superuser (basic-auth secret)
+        superuser:
+          existingSecret: netbox-superuser
+
+        # secret_key + db/cache/tasks passwords all read from netbox-config
+        existingSecret: netbox-config
+
+        # Bundled Postgres — reads netbox-postgresql
+        postgresql:
+          enabled: true
+          auth:
+            username: netbox
+            database: netbox
+            existingSecret: netbox-postgresql
+          primary:
+            nodeSelector:
+              kubernetes.io/hostname: kube003
+            persistence:
+              storageClass: local-path
+              size: 8Gi
+
+        # Bundled Valkey — reads netbox-valkey
+        valkey:
+          enabled: true
+          sentinel:
+            enabled: false
+          auth:
+            existingSecret: netbox-valkey
+          primary:
+            nodeSelector:
+              kubernetes.io/hostname: kube003
+            persistence:
+              storageClass: local-path
+              size: 2Gi
+
+        # Media persistence (local-path, RWO, single replica)
+        persistence:
+          enabled: true
+          storageClass: local-path
+          size: 5Gi
+          accessMode: ReadWriteOnce
+
+        # We use Traefik IngressRoute instead of the chart's ingress
+        ingress:
+          enabled: false
+
+        service:
+          type: ClusterIP
+          port: 80
+
+        allowedHosts:
+          - netbox.jmarcelocarvalho.com
+          - netbox.netbox.svc.cluster.local
+
+        # Skip housekeeping cron to keep resource pressure low on kube003 for now
+        housekeeping:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: netbox
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
