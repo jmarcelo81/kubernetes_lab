@@ -48,6 +48,8 @@ spec:
           enabled: true
           sentinel:
             enabled: false
+          replica:
+            replicaCount: 0
           auth:
             existingSecret: netbox-valkey
           primary:
@@ -56,6 +58,7 @@ spec:
             persistence:
               storageClass: local-path
               size: 2Gi
+
 
         # Media persistence (local-path, RWO, single replica)
         persistence:
