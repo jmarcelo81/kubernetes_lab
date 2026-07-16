@@ -63,9 +63,7 @@ spec:
         # Media persistence (local-path, RWO, single replica)
         persistence:
           enabled: true
-          storageClass: local-path
-          size: 5Gi
-          accessMode: ReadWriteOnce
+          existingClaim: netbox-media
 
         # We use Traefik IngressRoute instead of the chart's ingress
         ingress:
