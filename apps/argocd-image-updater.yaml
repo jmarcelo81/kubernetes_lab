@@ -21,7 +21,6 @@ spec:
             serverAddress: argocd-server.argocd.svc.cluster.local
             insecure: true
             plaintext: false
-        
         serviceAccount:
           create: true
   destination:
