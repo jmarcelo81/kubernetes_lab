@@ -63,6 +63,9 @@ spec:
             - { name: config, mountPath: /app/config/kubernetes.yaml, subPath: kubernetes.yaml }
             - { name: config, mountPath: /app/config/bookmarks.yaml,  subPath: bookmarks.yaml }
             - { name: logs,   mountPath: /app/config/logs }
+            - { name: config, mountPath: /app/config/docker.yaml,   subPath: docker.yaml }
+            - { name: config, mountPath: /app/config/custom.css,    subPath: custom.css }
+            - { name: config, mountPath: /app/config/custom.js,     subPath: custom.js }
       volumes:
         - name: config
           configMap:

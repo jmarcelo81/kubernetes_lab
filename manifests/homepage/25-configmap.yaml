@@ -7,6 +7,10 @@ metadata:
 data:
   kubernetes.yaml: |
     mode: cluster
+  
+  docker.yaml: ""
+  custom.css: ""
+  custom.js: ""
 
   settings.yaml: |
     title: jmarcelocarvalho homelab
