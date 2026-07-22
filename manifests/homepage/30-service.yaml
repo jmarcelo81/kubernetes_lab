@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: homepage
+  labels: { app: homepage }
+spec:
+  type: ClusterIP           # LAN/ingress reaches it later; no NodePort/LB for a cluster-internal svc
+  selector: { app: homepage }
+  ports:
+    - { name: http, port: 3000, targetPort: 3000 }

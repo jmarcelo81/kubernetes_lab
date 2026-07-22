@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+  labels: { app: homepage }
+data:
+  kubernetes.yaml: |
+    mode: cluster
+
+  settings.yaml: |
+    title: jmarcelocarvalho homelab
+    headerStyle: clean
+    theme: dark
+    color: slate
+    target: _blank
+    layout:
+      Platform:
+        style: row
+        columns: 4
+      Infrastructure:
+        style: row
+        columns: 4
+      Observability:
+        style: row
+        columns: 3
+      Media & Personal:
+        style: row
+        columns: 4
+
+  widgets.yaml: |
+    - resources:
+        backend: kubernetes
+        expanded: true
+        cpu: true
+        memory: true
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "k3s"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: short
+
+  services.yaml: |
+    - Platform:
+        - ArgoCD:
+            icon: argocd.png
+            href: https://argocd.jmarcelocarvalho.com
+            description: GitOps continuous delivery
+            namespace: argocd
+        - Gitea:
+            icon: gitea.png
+            href: https://gitea.jmarcelocarvalho.com
+            description: Self-hosted git
+            namespace: gitea
+        - Jenkins:
+            icon: jenkins.png
+            href: https://jenkins.jmarcelocarvalho.com
+            description: CI/CD pipelines
+            namespace: jenkins
+        - Harbor:
+            icon: harbor.png
+            href: https://harbor.jmarcelocarvalho.com
+            description: Container registry
+            namespace: harbor
+
+    - Infrastructure:
+        - Vault:
+            icon: vault.png
+            href: https://vault.jmarcelocarvalho.com
+            description: Secrets management
+            namespace: vault
+        - NetBox:
+            icon: netbox.png
+            href: https://netbox.jmarcelocarvalho.com
+            description: Network source of truth
+            namespace: netbox
+        - Uptime Kuma:
+            icon: uptime-kuma.png
+            href: https://uptime.jmarcelocarvalho.com
+            description: Uptime monitoring
+            namespace: uptime-kuma
+        - AdGuard Home:
+            icon: adguard-home.png
+            href: http://10.10.10.1:3000
+            description: LAN DNS + ad blocking
+
+    - Observability:
+        - Grafana:
+            icon: grafana.png
+            href: https://grafana.jmarcelocarvalho.com
+            description: Dashboards
+            namespace: monitoring
+        - Prometheus:
+            icon: prometheus.png
+            href: https://prometheus.jmarcelocarvalho.com
+            description: Metrics
+            namespace: monitoring
+        - Alertmanager:
+            icon: alertmanager.png
+            href: https://alertmanager.jmarcelocarvalho.com
+            description: Alerts
+            namespace: monitoring
+
+    - Media & Personal:
+        - Jellyfin:
+            icon: jellyfin.png
+            href: https://jellyfin.jmarcelocarvalho.com
+            description: Media server
+            namespace: jellyfin
+        - Immich:
+            icon: immich.png
+            href: https://immich.jmarcelocarvalho.com
+            description: Photo library
+            namespace: immich
+        - Vaultwarden:
+            icon: vaultwarden.png
+            href: https://vaultwarden.jmarcelocarvalho.com
+            description: Password vault
+            namespace: vaultwarden
+        - Linkding:
+            icon: linkding.png
+            href: https://linkding.jmarcelocarvalho.com
+            description: Bookmarks
+            namespace: linkding
+
+  bookmarks.yaml: |
+    - Documentation:
+        - Kubernetes:
+            - abbr: K8
+              href: https://kubernetes.io/docs/
+        - K3s:
+            - abbr: K3
+              href: https://docs.k3s.io/
+        - ArgoCD:
+            - abbr: AR
+              href: https://argo-cd.readthedocs.io/
+    - Cloud:
+        - AWS Console:
+            - abbr: AW
+              href: https://console.aws.amazon.com/
+        - Cloudflare:
+            - abbr: CF
+              href: https://dash.cloudflare.com/
+    - Dev:
+        - GitHub:
+            - abbr: GH
+              href: https://github.com/jmarcelo81
+        - Homelab Repo:
+            - abbr: HL
+              href: https://github.com/jmarcelo81/kubernetes_lab
