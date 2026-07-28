@@ -9,7 +9,7 @@ infrastructure rather than a third-party service.
 ## 2. Facts
 
 - **Image:** `sissbruecker/linkding:1.45.0-alpine`
-- **Deployment:** raw manifest (no Helm)
+- **Deployment:** Raw manifests managed by ArgoCD (app-of-apps, wave 1)
 - **Namespace:** `linkding`
 - **URL:** links.jmarcelocarvalho.com
 - **Storage:** 2Gi local-path PVC (SQLite database + bookmark archive snapshots)
@@ -30,73 +30,72 @@ The superuser password is injected via a Kubernetes Secret (`linkding-superuser`
 in the deployment env. That secret is **not** in the manifest file and **not** committed to
 git — it must be created manually before applying the manifest (see section 4).
 
+The superuser password lives in Vault at `secret/linkding` (key: `password`). An ExternalSecret
+in the `linkding` namespace watches that path via the `vault-backend` ClusterSecretStore and
+renders a native Kubernetes Secret (`linkding-superuser`) which the deployment mounts via `envFrom`.
+Nothing sensitive is committed to Git.
+
 ## 4. Deployment steps
 
-Create the namespace:
+This service is fully managed by ArgoCD. There are no manual `kubectl apply`
+or `kubectl create secret` steps — that pattern is documented here only for
+historical reference (see section 5D).
+
+To deploy or update:
+
+1. Edit manifests under `manifests/linkding/` on a feature branch
+2. Open a PR against `main`
+3. On merge, the root app-of-apps picks up `apps/linkding.yaml` and syncs
+
+To verify the deployment:
 
 ```bash
-kubectl create namespace linkding
-```
-
-Create the superuser secret (do this before applying the manifest — the pod will fail to
-start without it):
-
-```bash
-kubectl create secret generic linkding-superuser \
-  --namespace linkding \
-  --from-literal=password='<your-password>'
-```
-
-Apply the manifest:
-
-```bash
-kubectl apply -f ~/k3s-manifests/linkding/linkding.yaml
-```
-
-Watch it come up:
-
-```bash
-kubectl get pods -n linkding -w
-```
-
-Verify the TLS certificate was issued:
-
-```bash
-kubectl get certificate -n linkding
-```
-
-Verify the site is live:
-
-```bash
+kubectl -n argocd get app linkding
+kubectl -n linkding get pod,pvc,ingress,externalsecret
+kubectl -n linkding get certificate
 curl -I https://links.jmarcelocarvalho.com
 ```
 
+To rotate the superuser password: update the value in Vault at
+`secret/linkding`, then restart the deployment so the pod re-reads the env
+(`kubectl -n linkding rollout restart deployment linkding`). ESO refreshes
+the K8s Secret on its own interval (default 1h), but the pod won't pick up
+env changes without a restart.
+
 ## 5. Gotchas
 
-**A) Secret must exist before applying the manifest.** The deployment references
-`linkding-superuser` as an `envFrom` secret. If the secret doesn't exist when the pod
-starts, it will crash. Always run the `kubectl create secret` step first.
+**A) Wave ordering is what makes the ESO-first pattern safe.**
+The `linkding-secrets` ArgoCD Application is annotated with sync-wave `-1`
+and the workload Application with wave `1`. This ordering ensures the
+ExternalSecret exists and has materialized a K8s Secret before the pod
+tries to `envFrom` it. If wave ordering is broken, the pod will crashloop
+with a missing-secret error until ESO catches up.
 
-**B) No CrowdSec middleware on this ingress.** Unlike Gitea and Uptime Kuma, the Linkding
-ingress only sets `router.entrypoints: websecure` — the CrowdSec bouncer annotation is
-absent. This was the state at initial deployment and should be reviewed: adding
+**B) No CrowdSec middleware on this ingress.**
+Unlike Gitea and Uptime Kuma, the Linkding ingress does not set the
+CrowdSec bouncer middleware annotation. Adding
 `traefik.ingress.kubernetes.io/router.middlewares: kube-system-crowdsec-bouncer@kubernetescrd`
-to the ingress annotations would bring it in line with the other services.
+would align it with the other public services.
 
-**C) Replicas must stay at 1.** SQLite + `ReadWriteOnce` PVC means scaling beyond 1 replica
-will cause the second pod to fail to mount the volume. If HA is ever needed, migrating to
+**C) Replicas must stay at 1.**
+SQLite + `ReadWriteOnce` PVC means scaling beyond 1 replica will cause the
+second pod to fail to mount the volume. If HA is ever needed, migrating to
 PostgreSQL would be the path.
 
-## 6. Access model
+**D) Migrated from hand-applied to GitOps on 2026-07-28.**
+Prior to that, the deployment lived in `linkding/linkding.yaml` at the repo
+root, was applied with `kubectl apply -f`, and the superuser secret was
+created imperatively via `kubectl create secret generic`. The migration
+replaced the imperative secret with an ExternalSecret, so the Vault path
+`secret/linkding` must be populated before the app is deployed to a fresh
+cluster.
 
-Publicly exposed via Traefik ingress (HTTPS). Login is required to access bookmarks — there
-is no anonymous read mode. The superuser account is `marcelo`, password stored in the
-`linkding-superuser` Kubernetes Secret.
+## 6. Access model
+Publicly exposed via Traefik ingress (HTTPS). Login is required to access
+bookmarks — there is no anonymous read mode. The superuser account is
+`marcelo`, password stored in Vault at `secret/linkding`.
 
 ## 7. What's next
-
-- Add the CrowdSec bouncer middleware to the ingress annotation (align with other services)
-- Set up automated PVC backup for the SQLite database
+- Set up automated PVC backup for the SQLite database (candidate for Velero once installed)
 - Explore the Linkding browser extension for faster bookmarking
 - Evaluate enabling Wayback Machine snapshot archiving (would require bumping PVC size)
-- Migrate services to Helm as a progression when I need to upgrade it. It will be done organically
