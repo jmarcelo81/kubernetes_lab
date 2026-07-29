@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  ADMIN_RATELIMIT_MAX_BURST: "3"
+  ADMIN_RATELIMIT_SECONDS: "300"
+  DATA_FOLDER: "/data"
+  DATABASE_IDLE_TIMEOUT: "600"
+  DATABASE_MAX_CONNS: "10"
+  DATABASE_MIN_CONNS: "2"
+  DATABASE_TIMEOUT: "30"
+  DB_CONNECTION_RETRIES: "15"
+  DOMAIN: "https://vw.jmarcelocarvalho.com"
+  EMAIL_CHANGE_ALLOWED: "true"
+  EMERGENCY_ACCESS_ALLOWED: "true"
+  EMERGENCY_NOTIFICATION_REMINDER_SCHEDULE: "0 3 * * * *"
+  EMERGENCY_REQUEST_TIMEOUT_SCHEDULE: "0 7 * * * *"
+  ENABLE_DB_WAL: "true"
+  EXTENDED_LOGGING: "true"
+  ICON_BLACKLIST_NON_GLOBAL_IPS: "true"
+  ICON_REDIRECT_CODE: "302"
+  ICON_SERVICE: "internal"
+  INVITATION_EXPIRATION_HOURS: "120"
+  INVITATION_ORG_NAME: "Vaultwarden"
+  INVITATIONS_ALLOWED: "true"
+  IP_HEADER: "X-Real-IP"
+  LOG_TIMESTAMP_FORMAT: "%Y-%m-%d %H:%M:%S.%3f"
+  ORG_EVENTS_ENABLED: "false"
+  ORG_GROUPS_ENABLED: "false"
+  REQUIRE_DEVICE_EMAIL: "false"
+  ROCKET_ADDRESS: "0.0.0.0"
+  ROCKET_PORT: "8080"
+  ROCKET_WORKERS: "10"
+  SENDS_ALLOWED: "true"
+  SHOW_PASSWORD_HINT: "false"
+  SIGNUPS_ALLOWED: "false"
+  SIGNUPS_VERIFY: "true"
+  WEB_VAULT_ENABLED: "true"
