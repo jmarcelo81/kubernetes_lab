@@ -4,6 +4,7 @@ metadata:
   name: vaultwarden
   namespace: vaultwarden
   annotations:
+    argocd.argoproj.io/sync-wave: "1"
     cert-manager.io/cluster-issuer: letsencrypt-cloudflare
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-crowdsec-bouncer@kubernetescrd
@@ -22,4 +23,4 @@ spec:
               service:
                 name: vaultwarden
                 port:
-                  number: 80   # VERIFY: kubectl get svc -n vaultwarden vaultwarden
+                  number: 80
