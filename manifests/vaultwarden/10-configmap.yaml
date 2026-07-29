@@ -37,6 +37,6 @@ data:
   ROCKET_WORKERS: "10"
   SENDS_ALLOWED: "true"
   SHOW_PASSWORD_HINT: "false"
-  SIGNUPS_ALLOWED: "false"
-  SIGNUPS_VERIFY: "true"
+  SIGNUPS_ALLOWED: "true"
+  SIGNUPS_VERIFY: "false"
   WEB_VAULT_ENABLED: "true"
