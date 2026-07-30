@@ -31,22 +31,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: forgejo-config
-          env:
-            - name: FORGEJO_ADMIN_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: forgejo-admin
-                  key: admin-username
-            - name: FORGEJO_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: forgejo-admin
-                  key: admin-password
-            - name: FORGEJO_ADMIN_EMAIL
-              valueFrom:
-                secretKeyRef:
-                  name: forgejo-admin
-                  key: admin-email
+
           volumeMounts:
             - name: data
               mountPath: /data
@@ -62,19 +47,7 @@ spec:
               port: 3000
             initialDelaySeconds: 60
             periodSeconds: 30
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - |
-                    until forgejo admin user list >/dev/null 2>&1; do sleep 2; done
-                    forgejo admin user create --admin \
-                      --username "$FORGEJO_ADMIN_USERNAME" \
-                      --password "$FORGEJO_ADMIN_PASSWORD" \
-                      --email "$FORGEJO_ADMIN_EMAIL" \
-                      --must-change-password=false 2>&1 | grep -v "already exists" || true
+
   volumeClaimTemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
