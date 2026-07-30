@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forgejo-config
+  namespace: forgejo
+data:
+  FORGEJO__server__DOMAIN: "forgejo.jmarcelocarvalho.com"
+  FORGEJO__server__ROOT_URL: "https://forgejo.jmarcelocarvalho.com/"
+  FORGEJO__server__HTTP_PORT: "3000"
+  FORGEJO__server__START_SSH_SERVER: "true"
+  FORGEJO__server__SSH_DOMAIN: "forgejo.jmarcelocarvalho.com"
+  FORGEJO__server__SSH_PORT: "30022"
+  FORGEJO__server__SSH_LISTEN_PORT: "2222"
+  FORGEJO__server__DISABLE_SSH: "false"
+  FORGEJO__database__DB_TYPE: "sqlite3"
+  FORGEJO__database__PATH: "/data/gitea/forgejo.db"
+  FORGEJO__security__INSTALL_LOCK: "true"
+  FORGEJO__service__DISABLE_REGISTRATION: "true"
+  FORGEJO__log__MODE: "console"
+  FORGEJO__log__LEVEL: "Info"

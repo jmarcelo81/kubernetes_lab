@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: forgejo-ssh
+  namespace: forgejo
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector:
+    app: forgejo
+  ports:
+    - name: ssh
+      port: 2222
+      targetPort: 2222
+      nodePort: 30022
