@@ -91,3 +91,4 @@ Privately exposed with Traefik ingress (HTTPS), and a login is required
 
 - Store the Vault and Gitea dashboards in Kubernetes ConfigMaps (dashboards-as-code) so they're version-controlled and redeployed automatically by the Grafana sidecar, instead of click-imported.
 - Replace the placeholder Vault dashboard with a lean, hand-built one scoped to the single-node setup.
+- Adding an entry to demonstrate git commit/push to colleagues 07/29
