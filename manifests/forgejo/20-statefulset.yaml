@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: forgejo
+  namespace: forgejo
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  serviceName: forgejo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forgejo
+  template:
+    metadata:
+      labels:
+        app: forgejo
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: kube002
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: forgejo
+          image: codeberg.org/forgejo/forgejo:15.0.3
+          ports:
+            - name: http
+              containerPort: 3000
+            - name: ssh
+              containerPort: 2222
+          envFrom:
+            - configMapRef:
+                name: forgejo-config
+          env:
+            - name: FORGEJO_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-admin
+                  key: admin-username
+            - name: FORGEJO_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-admin
+                  key: admin-password
+            - name: FORGEJO_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-admin
+                  key: admin-email
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    until forgejo admin user list >/dev/null 2>&1; do sleep 2; done
+                    forgejo admin user create --admin \
+                      --username "$FORGEJO_ADMIN_USERNAME" \
+                      --password "$FORGEJO_ADMIN_PASSWORD" \
+                      --email "$FORGEJO_ADMIN_EMAIL" \
+                      --must-change-password=false 2>&1 | grep -v "already exists" || true
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+        annotations:
+          volume.kubernetes.io/selected-node: kube003
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 20Gi
