@@ -81,7 +81,7 @@ spec:
       metadata:
         name: data
         annotations:
-          volume.kubernetes.io/selected-node: kube003
+          volume.kubernetes.io/selected-node: kube002
       spec:
         accessModes: [ReadWriteOnce]
         storageClassName: local-path
