@@ -20,7 +20,7 @@ spec:
         kubernetes.io/hostname: kube003
       containers:
         - name: vaultwarden
-          image: docker.io/vaultwarden/server:1.36.0-alpine
+          image: docker.io/vaultwarden/server:1.37.1-alpine
           ports:
             - name: http
               containerPort: 8080
