@@ -11,7 +11,6 @@ spec:
     repoURL: https://github.com/jmarcelo81/kubernetes_lab.git
     targetRevision: main
     path: manifests/music
-    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: music
