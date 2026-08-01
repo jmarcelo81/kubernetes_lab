@@ -23,11 +23,5 @@ secrets/
 .DS_Store
 *.swp
 
-# === Wazuh (decommissioned; rules harmless until the dir is git rm'd) ===
-wazuh/wazuh-kubernetes/wazuh/certs/**/*.pem
-wazuh/wazuh-kubernetes/wazuh/certs/**/*.csr
-wazuh/wazuh-kubernetes/wazuh/certs/**/*.srl
-wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml
-wazuh/wazuh-kubernetes/wazuh/secrets/*.bak
-wazuh/wazuh-kubernetes/wazuh/secrets/*.yaml.bak
+# === Testing Harbor and Jenkins ===
 smoketest/
