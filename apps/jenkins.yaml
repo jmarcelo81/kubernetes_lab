@@ -10,12 +10,12 @@ spec:
   source:
     repoURL: https://charts.jenkins.io
     chart: jenkins
-    targetRevision: 4.9.0
+    targetRevision: 5.9.32
     helm:
       values: |
         controller:
           image: jenkins/jenkins
-          tag: latest
+          tag: "2.555.3-jdk21"
           
           persistence:
             enabled: true
