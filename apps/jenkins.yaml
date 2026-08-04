@@ -14,8 +14,9 @@ spec:
     helm:
       values: |
         controller:
-          image: jenkins/jenkins
-          tag: "2.555.3-jdk21"
+          image:
+            repository: jenkins/jenkins
+            tag: "2.555.3-jdk21"
           persistence:
             enabled: true
             storageClassName: local-path
@@ -38,8 +39,9 @@ spec:
 
         agent:
           enabled: true
-          image: jenkins/inbound-agent
-          tag: "3237.v9e6cf8c61e27"
+          image:
+            repository: jenkins/inbound-agent
+            tag: "3237.v9e6cf8c61e27"
 
         rbac:
           create: true
