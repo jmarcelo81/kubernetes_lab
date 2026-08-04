@@ -16,45 +16,40 @@ spec:
         controller:
           image: jenkins/jenkins
           tag: "2.555.3-jdk21"
-          
           persistence:
             enabled: true
             storageClassName: local-path
             size: 20Gi
-          
           serviceAccount:
             create: true
             name: jenkins
-          
           nodeSelector:
             kubernetes.io/hostname: kube003
-          
           installPlugins:
-            - kubernetes:latest
-            - docker-plugin:latest
-            - github-branch-source:latest
-            - pipeline-stage-view:latest
-            - configuration-as-code:latest
-          
+            - kubernetes:4423.vb_59f230b_ce53
+            - workflow-aggregator:608.v67378e9d3db_1
+            - git:5.10.1
+            - configuration-as-code:2089.v970a_0b_a_8cc6d
+            - docker-plugin:1324.v2fb_b_df97fe1d
+            - github-branch-source:1917.v9ee8a_39b_3d0d
+            - pipeline-stage-view:2.32
           JCasC:
             enabled: true
 
         agent:
           enabled: true
-          image: jenkins/inbound-agent:latest
-        
+          image: jenkins/inbound-agent
+          tag: "3237.v9e6cf8c61e27"
+
         rbac:
           create: true
-  
   destination:
     server: https://kubernetes.default.svc
     namespace: jenkins
-  
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  
   revisionHistoryLimit: 3
