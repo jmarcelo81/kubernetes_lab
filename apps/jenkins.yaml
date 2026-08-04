@@ -15,6 +15,7 @@ spec:
       values: |
         controller:
           image:
+            registry: docker.io
             repository: jenkins/jenkins
             tag: "2.555.3-jdk21"
           persistence:
@@ -40,6 +41,7 @@ spec:
         agent:
           enabled: true
           image:
+            registry: docker.io
             repository: jenkins/inbound-agent
             tag: "3237.v9e6cf8c61e27"
 
