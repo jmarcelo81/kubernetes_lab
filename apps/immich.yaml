@@ -66,8 +66,6 @@ spec:
               annotations:
                 cert-manager.io/cluster-issuer: letsencrypt-cloudflare
                 traefik.ingress.kubernetes.io/router.entrypoints: websecure
-                # Deliberately NO crowdsec-bouncer middleware — LAN-only.
-                # Flip to public + CrowdSec after NAS + 2FA enrolled.
               hosts:
                 - host: immich.jmarcelocarvalho.com
                   paths:
