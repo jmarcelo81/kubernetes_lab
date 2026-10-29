@@ -1,38 +1,57 @@
-# KUBERNETES
+# Kubernetes Lab: GitOps on K3s
 
-## 1. What it is
-I am using this repository to create apps/services on my homelab using k3s pods. The long term goal is to become a good Cloud Engineer / Site Reliability Engineer and progress with my career in technology
+A 4-node K3s homelab where every service is deployed from this repository by
+ArgoCD using the app-of-apps pattern. I use it to practice the daily work of SRE
+and DevOps: GitOps, secrets management, observability and CI/CD.
 
-## 2. Facts
+## Architecture
 
-The services to be deployed are for learning CI/CD pipelines, how the tools are used by engineers and how they interact with each other, which function they perform (Which problem they solve) and additionally I am deploying some apps on my lab for self hosting.
+```mermaid
+flowchart LR
+  A[git push] --> B[(GitHub: kubernetes_lab)]
+  B --> C[ArgoCD root app]
+  C --> D[25 Applications]
+  D --> E[K3s cluster]
+  F[(Vault)] --> G[External Secrets Operator] --> E
+  H[Argo CD Image Updater] --> C
+  E --> I[Prometheus and Grafana]
+```
 
-- [Linkding](./linkding/README.md) — bookmark manager
-- [Uptime Kuma](./uptime-kuma/README.md) — uptime monitoring
-- [Gitea](./gitea/README.md) — self-hosted git
-- [HashiCorp Vault](./vault/README.md) — secrets management
-- [Password Manager](./vaultwarden/README.md) — self-hosted password vault
-- [Prometheus & Grafana](./monitoring/README.md) - cluster health monitoring
-- [Wazuh](./wazuh/README.md) - To be created
+- **Cluster:** K3s v1.35 on Ubuntu 24.04, 1 control plane (`kubecp`) and 3 workers (`kube001-003`) on repurposed PCs
+- **GitOps:** a `root` ArgoCD Application manages every app in `apps/`; Argo CD Image Updater tracks new image tags
+- **Secrets:** HashiCorp Vault synced by External Secrets Operator through a ClusterSecretStore; each app has a matching `<app>-secrets` Application; Vault's Kubernetes auth is managed with Terraform (`terraform/vault`)
+- **Ingress and TLS:** Traefik with cert-manager (Let's Encrypt, Cloudflare DNS challenge)
+- **Observability:** kube-prometheus-stack (Prometheus, Alertmanager, Grafana), ServiceMonitors, Uptime Kuma, Homepage dashboard
 
+## Services
 
-### To be deployed
+| Area | Services |
+| --- | --- |
+| Platform | ArgoCD, Argo CD Image Updater, cert-manager, External Secrets, Vault, Traefik |
+| CI/CD and registry | Forgejo (self-hosted Git), Harbor (registry), Jenkins |
+| Observability | kube-prometheus-stack, Uptime Kuma, Homepage |
+| Infrastructure tooling | NetBox |
+| Self-hosted apps | Vaultwarden, Linkding, Immich, Jellyfin, music stack |
 
-- **Ansible**
-- **Netbox**
-- **Immich**
-- **Jellyfin**
-- **NextCloud**
+## Repository layout
 
-## 3. Deployment
+| Path | Contents |
+| --- | --- |
+| `apps/` | ArgoCD Application manifests (app-of-apps) |
+| `argocd/` | ArgoCD configuration and ingress |
+| `bootstrap/` | Cluster bootstrap resources |
+| `manifests/` | Per-app manifests and Helm values |
+| `terraform/vault/` | Vault Kubernetes-auth configuration |
+| `vault/` | Vault deployment |
 
-I am deploying these services as pods on my K3s cluster that I am running on my homelab. I have 4 used computers that I am using as:
-- **Control Plane:** kubecp
-- **Worker Nodes:** kube001, kube002, and kube003
+## Roadmap
 
-## 4. Gotchas
-None yet.
+- GitHub Actions pipeline: build, push to Harbor, Image Updater rolls out the tag
+- Operator-managed Postgres for Harbor with generated credentials
+- Alerting rules and SLO dashboards per service
+- Wazuh and host-level CrowdSec
 
-## 5. What's Next
+## Lessons learned
 
-Once every service is running as intended, the plan is to integrate Argo CD and GitHub actions and ensure that pods are automatically replaced once they become unhealthy, that my website updates have an automated end to end pipeline, and that the changes are recorded both in GitHub and my Gitea instance.
+- Cluster-level CrowdSec didn't fit this setup, so it moved to the host
+- Replaced Gitea with Forgejo
