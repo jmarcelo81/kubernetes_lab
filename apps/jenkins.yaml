@@ -18,6 +18,10 @@ spec:
             registry: docker.io
             repository: jenkins/jenkins
             tag: "2.555.3-jdk21"
+          admin:
+            existingSecret: jenkins-admin
+            userKey: jenkins-admin-user
+            passwordKey: jenkins-admin-password
           persistence:
             enabled: true
             storageClassName: local-path
@@ -31,10 +35,13 @@ spec:
             - kubernetes:4423.vb_59f230b_ce53
             - workflow-aggregator:608.v67378e9d3db_1
             - git:5.10.1
-            - configuration-as-code:2089.v970a_0b_a_8cc6d
+            - configuration-as-code:2117.vc05a_0b_e6b_f4e
+            - credentials:1514.vb_01eb_014e7d4
             - docker-plugin:1324.v2fb_b_df97fe1d
             - github-branch-source:1917.v9ee8a_39b_3d0d
             - pipeline-stage-view:2.32
+          installLatestPlugins: false
+          installLatestSpecifiedPlugins: false
           JCasC:
             enabled: true
 
